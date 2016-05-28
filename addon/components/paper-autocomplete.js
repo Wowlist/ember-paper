@@ -175,6 +175,7 @@ export default Ember.Component.extend({
       // no cache
 
       let data = this.filterArray(source, searchText, lookupKey);
+
       if (source.then && source.get('isFulfilled')) {
         // cache when we have a PromiseArray
         this.cacheSet(searchText, data);
@@ -216,7 +217,7 @@ export default Ember.Component.extend({
   shouldHide: Ember.computed.not('isMinLengthMet'),
 
   isMinLengthMet: Ember.computed('searchText', 'minLength', function() {
-    return this.get('searchText').length >= this.get('minLength');
+    return this.get('searchText.length') >= this.get('minLength');
   }),
 
   /*
@@ -240,11 +241,16 @@ export default Ember.Component.extend({
     },
 
     pickModel(model) {
-      this.set('model', model);
-      let value = this.lookupLabelOfItem(model);
-      // First set previousSearchText then searchText ( do not trigger observer only update value! ).
-      this.set('previousSearchText', value);
-      this.set('searchText', value);
+      if (this.attrs.pickModel) {
+        this.attrs.pickModel(model);
+      } else {
+        this.set('model', model);
+        let value = this.lookupLabelOfItem(model);
+        // First set previousSearchText then searchText ( do not trigger observer only update value! ).
+        this.set('previousSearchText', value);
+        this.set('searchText', value);
+      }
+
       this.set('hidden', true);
     },
 
