@@ -1,3 +1,6 @@
+/**
+ * @module ember-paper
+ */
 import Ember from 'ember';
 import BaseFocusable from './base-focusable';
 import ColorMixin from 'ember-paper/mixins/color-mixin';
@@ -12,6 +15,13 @@ import maxlengthValidator from 'ember-paper/validators/maxlength';
 
 const { $, computed, isArray, isEmpty, Logger, A, run, assert, get } = Ember;
 
+/**
+ * @class PaperInput
+ * @extends BaseFocusable
+ * @uses ChildMixin
+ * @uses ColorMixin
+ * @uses FlexMixin
+ */
 export default BaseFocusable.extend(ColorMixin, FlexMixin, ChildMixin, {
   tagName: 'md-input-container',
   classNames: ['md-default-theme'],
@@ -210,14 +220,18 @@ export default BaseFocusable.extend(ColorMixin, FlexMixin, ChildMixin, {
   },
 
   setValue(value) {
-    this.$('input, textarea').val(value);
+    if (this.$('input, textarea').val() !== value) {
+      this.$('input, textarea').val(value);
+    }
   },
 
   actions: {
     handleInput(e) {
       this.sendAction('onChange', e.target.value);
       // setValue below ensures that the input value is the same as this.value
-      this.setValue(this.get('value'));
+      run.next(() => {
+        this.setValue(this.get('value'));
+      });
       this.growTextarea();
       let inputElement = this.$('input').get(0);
       this.set('isNativeInvalid', inputElement && inputElement.validity && inputElement.validity.badInput);
